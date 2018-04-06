@@ -3,72 +3,110 @@ var Splitter = artifacts.require("./Splitter.sol");
 contract('Splitter', function(accounts) {
 
     var contract;
-    var ownerOrSender = accounts[0];
+    var owner_or_sender = accounts[0];
     var first_recipient = accounts[1];
     var second_recipient = accounts[2];
 
     // deploy
     beforeEach(function() {
-        return Splitter.new({from: ownerOrSender}).then(function(_instance){
+        return Splitter.new({from: owner_or_sender}).then(function(_instance){
              contract = _instance;
         })
     })
 
     it("should be own by owner", function(){
-        return contract.owner({from: ownerOrSender}).then(function(_owner){
-            assert.strictEqual(_owner, ownerOrSender, "Contract owner is not the same");
+        return contract.owner({from: owner_or_sender}).then(function(_owner){
+            assert.strictEqual(_owner, owner_or_sender, "Contract owner is not the same");
         })
     })
 
     it("should not be created passing a value", function(){
-        return Splitter.new({from: ownerOrSender, value: 10}).then(function(_instance){
+        return Splitter.new({from: owner_or_sender, value: 10}).then(function(_instance){
             //
-        }).catch(err => assert.include(err.message, 'non-payable constructor', 'Contract cannot be created with value'))
+        }).catch(err => assert.include(err.message, 'non-payable constructor'))
     })
 
     describe("testing split function", function() {
+
         describe("failing cases", function(){
 
             it("should fail if the owner/sender is second_recipient", function(){
-                return contract.split(first_recipient, ownerOrSender, {from: ownerOrSender, value: 1})
+                return contract.split(first_recipient, owner_or_sender, {from: owner_or_sender, value: 1})
                     .then(function(txn){
                         //
-                    }).catch(err => assert.include(err.message, 'revert', 'state reverted because of owner is one of the recipient'))
+                    }).catch(err => assert.include(err.message, 'revert'))
             })
 
             it("should fail if the owner/sender is first_recipient", function(){
-                return contract.split(ownerOrSender, second_recipient, {from: ownerOrSender, value: 1})
+                return contract.split(owner_or_sender, second_recipient, {from: owner_or_sender, value: 1})
                     .then(function(txn){
                         //
-                    }).catch(err => assert.include(err.message, 'revert', 'state reverted because of owner is one of the recipient'))
+                    }).catch(err => assert.include(err.message, 'revert'))
             })
 
             it("should fail if the recipients are the same", function(){
-                return contract.split(second_recipient, second_recipient, {from: ownerOrSender, value: 1})
+                return contract.split(second_recipient, second_recipient, {from: owner_or_sender, value: 1})
                     .then(function(txn){
                         //
-                    }).catch(err => assert.include(err.message, 'revert', 'state reverted because the address are the same'))
+                    }).catch(err => assert.include(err.message, 'revert'))
             })
 
             it("should fail if the first_recipient is empty", function(){
-                return contract.split('', second_recipient, {from: ownerOrSender, value: 1})
+                return contract.split('', second_recipient, {from: owner_or_sender, value: 1})
                     .then(function(txn){
                         //
-                    }).catch(err => assert.include(err.message, 'revert', 'state reverted because the first_recipient is empty'))
+                    }).catch(err => assert.include(err.message, 'revert'))
             })
 
             it("should fail if the second_recipient is empty", function(){
-                return contract.split(first_recipient, '', {from: ownerOrSender, value: 1})
+                return contract.split(first_recipient, '', {from: owner_or_sender, value: 1})
                     .then(function(txn){
                         //
-                    }).catch(err => assert.include(err.message, 'revert', 'state reverted because the second_recipient is empty'))
+                    }).catch(err => assert.include(err.message, 'revert'))
             })
 
             it("should fail if the recipients are empty", function(){
-                return contract.split('', '', {from: ownerOrSender, value: 1})
+                return contract.split('', '', {from: owner_or_sender, value: 1})
                     .then(function(txn){
                         //
-                    }).catch(err => assert.include(err.message, 'revert', 'state reverted because the empty address'))
+                    }).catch(err => assert.include(err.message, 'revert'))
+            })
+
+            it("should fail because of amount = 0", function(){
+                return contract.split(first_recipient, second_recipient, {from: owner_or_sender, value: 0})
+                    .then(function(txn){
+                        //
+                    }).catch(err => assert.include(err.message, 'revert'))
+            })
+
+            it("should fail because of amount % 2 != 0", function(){
+                return contract.split(first_recipient, second_recipient, {from: owner_or_sender, value: 1})
+                    .then(function(txn){
+                        //
+                    }).catch(err => assert.include(err.message, 'revert'))
+            })
+        })
+
+        describe("successful cases", function(){
+            it("should split correctly", function(){
+                var first_recipient_initial_balance = web3.eth.getBalance(first_recipient);
+                var second_recipient_initial_balance = web3.eth.getBalance(second_recipient);
+                var owner_or_sender_initial_balance = web3.eth.getBalance(owner_or_sender);
+
+                return contract.split(first_recipient, second_recipient, {from: owner_or_sender, value: 2})
+                    .then(_res => {
+                        var first_recipient_final_balance = web3.eth.getBalance(first_recipient);
+                        var second_recipient_final_balance = web3.eth.getBalance(second_recipient);
+                        var owner_or_sender_final_balance = web3.eth.getBalance(owner_or_sender);
+
+                        var gas_used = _res.receipt.gasUsed;
+                        var tx = web3.eth.getTransaction(_res.tx);
+                        var gas_price = tx.gasPrice;
+
+                        assert.strictEqual(first_recipient_final_balance.toString(10), first_recipient_initial_balance.plus(1).toString(10), "first_recipient has not gotten the correct amount")
+                        assert.strictEqual(second_recipient_final_balance.toString(10), second_recipient_initial_balance.plus(1).toString(10), "second_recipient has not gotten the correct amount")
+                        assert.strictEqual(owner_or_sender_final_balance.toString(10), owner_or_sender_initial_balance.minus(2).minus(gas_price.mul(gas_used)).toString(10), "second_recipient has not gotten the correct amount")
+                    })
             })
         })
     })
