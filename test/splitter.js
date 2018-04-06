@@ -5,7 +5,7 @@ contract('Campaign', function(accounts) {
     var contract;
     var ownerOrSender = accounts[0];
     var first_recipient = accounts[1];
-    var second_recipient = = accounts[2];
+    var second_recipient = accounts[2];
 
     // deploy
     beforeEach(function() {
