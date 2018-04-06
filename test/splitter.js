@@ -1,6 +1,6 @@
 var Splitter = artifacts.require("./Splitter.sol");
 
-contract('Campaign', function(accounts) {
+contract('Splitter', function(accounts) {
 
     var contract;
     var ownerOrSender = accounts[0];
