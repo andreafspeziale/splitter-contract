@@ -40,4 +40,22 @@ contract Splitter is Ownable, Destructible{
         require(_amount % 2 == 0);
         return true;
     }
+
+    /**
+     * @dev public function for splitting
+    */
+    function split(address _first_recipient, address _second_recipient) public payable returns (bool splitSuccess) {
+        // checks
+        if(!_avoidRecipientErrors(_first_recipient, _second_recipient)) revert();
+        if(!_isDivisible(msg.value)) revert();
+
+        // split the amount
+        uint amountSplitted = msg.value / 2;
+
+        // pay the splitted amount to recipients
+        _splitPay(_first_recipient, _second_recipient, amountSplitted);
+
+        // emit the event
+        emit Split(msg.sender, _first_recipient, _second_recipient, amountSplitted);
+    }
 }
