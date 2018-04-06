@@ -57,5 +57,7 @@ contract Splitter is Ownable, Destructible{
 
         // emit the event
         emit Split(msg.sender, _first_recipient, _second_recipient, amountSplitted);
+
+        return true;
     }
 }
