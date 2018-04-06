@@ -4,13 +4,18 @@ pragma solidity ^0.4.19;
 import "./Ownable.sol";
 import "./Destructible.sol";
 
+/**
+ * @title Splitter
+ * @dev Contract for funds splitting btw 2 address
+*/
+
 contract Splitter is Ownable, Destructible{
+
     // Event
     event Split(address from, address first_recipient, address second_recipient, uint amount);
 
     /**
-    * @title _avoidSelfSplit
-    * @dev private function to avoid self, same address, empty address splits
+     * @dev private function to avoid self, same address, empty address splits
     */
     function _avoidRecipientErrors(address _first_recipient, address _second_recipient) private view returns (bool areAvoided) {
         require(_first_recipient != _second_recipient);
@@ -20,11 +25,19 @@ contract Splitter is Ownable, Destructible{
     }
 
     /**
-    * @title _
-    * @dev private function to actually pay the recipients
+     * @dev private function to actually pay the recipients
     */
     function _splitPay(address _first_recipient, address _second_recipient, uint _amount) private {
         _first_recipient.transfer(_amount);
         _second_recipient.transfer(_amount);
+    }
+
+    /**
+     * @dev private function to actually pay the recipients
+    */
+    function _isDivisible(uint _amount) private pure returns (bool isDivisible) {
+        require(_amount > 0);
+        require(_amount % 2 == 0);
+        return true;
     }
 }
