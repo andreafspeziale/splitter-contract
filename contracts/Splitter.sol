@@ -17,7 +17,7 @@ contract Splitter is Ownable, Pausable{
     /**
      * @dev private function to avoid self, same address, empty address splits
     */
-    function _avoidRecipientErrors(address _first_recipient, address _second_recipient) private view returns (bool areAvoided) {
+    function _areAcceptableRecipients(address _first_recipient, address _second_recipient) private view returns (bool areAvoided) {
         require(_first_recipient != _second_recipient);
         require(_first_recipient != address(0x00) && _second_recipient != address(0x00));
         require(_first_recipient != msg.sender && _second_recipient != msg.sender);
@@ -46,7 +46,7 @@ contract Splitter is Ownable, Pausable{
     */
     function split(address _first_recipient, address _second_recipient) public payable returns (bool splitSuccess) {
         // checks
-        if(!_avoidRecipientErrors(_first_recipient, _second_recipient)) revert();
+        if(!_areAcceptableRecipients(_first_recipient, _second_recipient)) revert();
         if(!_isDivisible(msg.value)) revert();
 
         // split the amount
