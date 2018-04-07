@@ -32,62 +32,63 @@ contract('Splitter', function(accounts) {
 
             it("should fail if the owner/sender is second_recipient", function(){
                 return contract.split(first_recipient, owner_or_sender, {from: owner_or_sender, value: 1})
-                    .then(function(txn){
+                    .then(function(_txn){
                         //
                     }).catch(err => assert.include(err.message, 'revert'))
             })
 
             it("should fail if the owner/sender is first_recipient", function(){
                 return contract.split(owner_or_sender, second_recipient, {from: owner_or_sender, value: 1})
-                    .then(function(txn){
+                    .then(function(_txn){
                         //
                     }).catch(err => assert.include(err.message, 'revert'))
             })
 
             it("should fail if the recipients are the same", function(){
                 return contract.split(second_recipient, second_recipient, {from: owner_or_sender, value: 1})
-                    .then(function(txn){
+                    .then(function(_txn){
                         //
                     }).catch(err => assert.include(err.message, 'revert'))
             })
 
             it("should fail if the first_recipient is empty", function(){
                 return contract.split('', second_recipient, {from: owner_or_sender, value: 1})
-                    .then(function(txn){
+                    .then(function(_txn){
                         //
                     }).catch(err => assert.include(err.message, 'revert'))
             })
 
             it("should fail if the second_recipient is empty", function(){
                 return contract.split(first_recipient, '', {from: owner_or_sender, value: 1})
-                    .then(function(txn){
+                    .then(function(_txn){
                         //
                     }).catch(err => assert.include(err.message, 'revert'))
             })
 
             it("should fail if the recipients are empty", function(){
                 return contract.split('', '', {from: owner_or_sender, value: 1})
-                    .then(function(txn){
+                    .then(function(_txn){
                         //
                     }).catch(err => assert.include(err.message, 'revert'))
             })
 
             it("should fail because of amount = 0", function(){
                 return contract.split(first_recipient, second_recipient, {from: owner_or_sender, value: 0})
-                    .then(function(txn){
+                    .then(function(_txn){
                         //
                     }).catch(err => assert.include(err.message, 'revert'))
             })
 
             it("should fail because of amount % 2 != 0", function(){
                 return contract.split(first_recipient, second_recipient, {from: owner_or_sender, value: 1})
-                    .then(function(txn){
+                    .then(function(_txn){
                         //
                     }).catch(err => assert.include(err.message, 'revert'))
             })
         })
 
         describe("successful cases", function(){
+
             it("should split correctly", function(){
                 var first_recipient_initial_balance = web3.eth.getBalance(first_recipient);
                 var second_recipient_initial_balance = web3.eth.getBalance(second_recipient);
@@ -106,6 +107,13 @@ contract('Splitter', function(accounts) {
                         assert.strictEqual(first_recipient_final_balance.toString(10), first_recipient_initial_balance.plus(1).toString(10), "first_recipient has not gotten the correct amount")
                         assert.strictEqual(second_recipient_final_balance.toString(10), second_recipient_initial_balance.plus(1).toString(10), "second_recipient has not gotten the correct amount")
                         assert.strictEqual(owner_or_sender_final_balance.toString(10), owner_or_sender_initial_balance.minus(2).minus(gas_price.mul(gas_used)).toString(10), "second_recipient has not gotten the correct amount")
+                    })
+            })
+
+            it("should split correctly", function(){
+                return contract.split.call(first_recipient, second_recipient, {from: owner_or_sender, value: 2})
+                    .then(_res => {
+                        assert.strictEqual(_res, true, "is not splitting correctly")
                     })
             })
         })
