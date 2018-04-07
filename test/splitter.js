@@ -26,9 +26,9 @@ contract('Splitter', function(accounts) {
         }).catch(err => assert.include(err.message, 'non-payable constructor'))
     })
 
-    describe("testing split function", function() {
+    describe("Testing split public function:", function() {
 
-        describe("failing cases", function(){
+        describe("Testing failing cases:", function(){
 
             it("should fail if the owner/sender is second_recipient", function(){
                 return contract.split(first_recipient, owner_or_sender, {from: owner_or_sender, value: 1})
@@ -87,7 +87,7 @@ contract('Splitter', function(accounts) {
             })
         })
 
-        describe("successful cases", function(){
+        describe("Successful cases:", function(){
 
             it("should split correctly", function(){
                 var first_recipient_initial_balance = web3.eth.getBalance(first_recipient);
