@@ -12,7 +12,7 @@ import "./Destructible.sol";
 contract Splitter is Ownable, Destructible{
 
     // Event
-    event Split(address from, address first_recipient, address second_recipient, uint amount);
+    event Split(address indexed _from, address indexed _first_recipient, address indexed _second_recipient, uint _amount);
 
     /**
      * @dev private function to avoid self, same address, empty address splits
