@@ -2,14 +2,14 @@ pragma solidity ^0.4.19;
 
 // Imports
 import "./Ownable.sol";
-import "./Destructible.sol";
+import "./Pausable.sol";
 
 /**
  * @title Splitter
  * @dev Contract for funds splitting btw 2 address
 */
 
-contract Splitter is Ownable, Destructible{
+contract Splitter is Ownable, Pausable{
 
     // Event
     event Split(address indexed _from, address indexed _first_recipient, address indexed _second_recipient, uint _amount);
