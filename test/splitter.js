@@ -117,5 +117,7 @@ contract('Splitter', function(accounts) {
                     })
             })
         })
+
+        //ToDo check on inherited contracts functionalities
     })
 })
