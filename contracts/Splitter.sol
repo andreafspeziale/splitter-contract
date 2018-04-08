@@ -13,6 +13,14 @@ contract Splitter is Ownable, Pausable{
 
     // Event
     event Split(address indexed _from, address indexed _first_recipient, address indexed _second_recipient, uint _amount);
+    event Withdraw(address indexed _from, uint _amount);
+
+    mapping(address => uint) public depositTracker;
+
+    modifier canWithdraw() {
+        require(depositTracker[msg.sender] > 0);
+        _;
+    }
 
     /**
      * @dev private function to avoid self, same address, empty address splits
@@ -27,14 +35,6 @@ contract Splitter is Ownable, Pausable{
     /**
      * @dev private function to actually pay the recipients
     */
-    function _splitPay(address _first_recipient, address _second_recipient, uint _amount) private {
-        _first_recipient.transfer(_amount);
-        _second_recipient.transfer(_amount);
-    }
-
-    /**
-     * @dev private function to actually pay the recipients
-    */
     function _isDivisible(uint _amount) private pure returns (bool isDivisible) {
         require(_amount > 0);
         require(_amount % 2 == 0);
@@ -42,9 +42,16 @@ contract Splitter is Ownable, Pausable{
     }
 
     /**
+     * @dev private function to actually pay the recipients
+    */
+    function _pay(address _recipient, uint _amount) private {
+        _recipient.transfer(_amount);
+    }
+
+    /**
      * @dev public function for splitting
     */
-    function split(address _first_recipient, address _second_recipient) public payable returns (bool splitSuccess) {
+    function split(address _first_recipient, address _second_recipient) public returns (bool splitSuccess) {
         // checks
         if(!_areAcceptableRecipients(_first_recipient, _second_recipient)) revert();
         if(!_isDivisible(msg.value)) revert();
@@ -52,12 +59,23 @@ contract Splitter is Ownable, Pausable{
         // split the amount
         uint amountSplitted = msg.value / 2;
 
-        // pay the splitted amount to recipients
-        _splitPay(_first_recipient, _second_recipient, amountSplitted);
+        // each time the amount will be overwritten in this way
+        withdrawals[_first_recipient] = amountSplitted;
+        withdrawals[_second_recipient] = amountSplitted;
 
-        // emit the event
+        // emit the Split event
         emit Split(msg.sender, _first_recipient, _second_recipient, amountSplitted);
 
+        return true;
+    }
+
+    /**
+     * @dev public function for withdraw funds only if sender is in the depositTracker
+    */
+    function withdraw() canWithdraw public payable returns(bool withdrawSuccess) {
+        // emit the Split event
+        emit Withdraw(msg.sender, depositTracker[msg.sender]);
+        _pay(msg.sender, depositTracker[msg.sender]);
         return true;
     }
 }
