@@ -15,12 +15,7 @@ contract Splitter is Ownable, Pausable{
     event Split(address indexed _from, address indexed _first_recipient, address indexed _second_recipient, uint _amount);
     event Withdraw(address indexed _from, uint _amount);
 
-    mapping(address => uint) public depositTracker;
-
-    modifier canWithdraw() {
-        require(depositTracker[msg.sender] > 0);
-        _;
-    }
+    mapping(address => uint) public balances;
 
     /**
      * @dev private function to avoid self, same address, empty address splits
@@ -36,15 +31,14 @@ contract Splitter is Ownable, Pausable{
      * @dev private function to actually pay the recipients
     */
     function _isDivisible(uint _amount) private pure returns (bool isDivisible) {
-        require(_amount > 0);
-        require(_amount % 2 == 0);
-        return true;
+        if(_amount > 0 && _amount % 2 == 0) return true;
+        else return false;
     }
 
     /**
-     * @dev private function to actually pay the recipients
+     * @dev private function to actually perform the transfer after a withdrawal request
     */
-    function _pay(address _recipient, uint _amount) private {
+    function _performWithdraw(address _recipient, uint _amount) private {
         _recipient.transfer(_amount);
     }
 
@@ -70,12 +64,13 @@ contract Splitter is Ownable, Pausable{
     }
 
     /**
-     * @dev public function for withdraw funds only if sender is in the depositTracker
+     * @dev public function for withdraw funds only if sender is in the balances
     */
-    function withdraw() canWithdraw public payable returns(bool withdrawSuccess) {
+    function withdraw() public payable returns(bool withdrawSuccess) {
+        if(!balances[msg.sender] > 0) return false;
         // emit the Split event
-        emit Withdraw(msg.sender, depositTracker[msg.sender]);
-        _pay(msg.sender, depositTracker[msg.sender]);
+        emit Withdraw(msg.sender, balances[msg.sender]);
+        _performWithdraw(msg.sender, deposit[msg.sender]);
         return true;
     }
 }
