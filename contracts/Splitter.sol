@@ -45,6 +45,7 @@ contract Splitter is Ownable, Pausable{
         if(!(balances[msg.sender] > 0)) return false;
         // emit the Split event
         emit Withdraw(msg.sender, balances[msg.sender]);
+        balances[msg.sender] = 0;
         _performWithdraw(msg.sender, balances[msg.sender]);
         return true;
     }
