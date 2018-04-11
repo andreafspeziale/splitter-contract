@@ -20,7 +20,7 @@ contract Splitter is Ownable, Pausable{
     /**
      * @dev public function for splitting
     */
-    function split(address _first_recipient, address _second_recipient) public returns (bool splitSuccess) {
+    function split(address _first_recipient, address _second_recipient) public payable returns (bool splitSuccess) {
         // checks
         if(!_areAcceptableRecipients(_first_recipient, _second_recipient)) revert();
         if(!_isDivisible(msg.value)) revert();
@@ -29,8 +29,8 @@ contract Splitter is Ownable, Pausable{
         uint amountSplitted = msg.value / 2;
 
         // each time the amount will be overwritten in this way
-        withdrawals[_first_recipient] = amountSplitted;
-        withdrawals[_second_recipient] = amountSplitted;
+        balances[_first_recipient] = amountSplitted;
+        balances[_second_recipient] = amountSplitted;
 
         // emit the Split event
         emit Split(msg.sender, _first_recipient, _second_recipient, amountSplitted);
@@ -42,10 +42,10 @@ contract Splitter is Ownable, Pausable{
      * @dev public function for withdraw funds only if sender is in the balances
     */
     function withdraw() public payable returns(bool withdrawSuccess) {
-        if(!balances[msg.sender] > 0) return false;
+        if(!(balances[msg.sender] > 0)) return false;
         // emit the Split event
         emit Withdraw(msg.sender, balances[msg.sender]);
-        _performWithdraw(msg.sender, deposit[msg.sender]);
+        _performWithdraw(msg.sender, balances[msg.sender]);
         return true;
     }
 
