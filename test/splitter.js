@@ -26,7 +26,7 @@ contract('Splitter', function(accounts) {
         }).catch(err => assert.include(err.message, 'non-payable constructor'))
     })
 
-    describe("Testing split public function:", function() {
+    /*describe("Testing split public function:", function() {
 
         describe("Failing cases:", function(){
 
@@ -116,7 +116,7 @@ contract('Splitter', function(accounts) {
                         assert.strictEqual(_res, true, "is not splitting correctly")
                     })
             })
-        })
+        })*/
 
         //ToDo check on inherited contracts functionalities
     })

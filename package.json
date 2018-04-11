@@ -1,0 +1,16 @@
+{
+  "name": "splitter-contract",
+  "version": "1.0.0",
+  "description": "a split contract",
+  "main": "truffle.js",
+  "scripts": {
+    "develop": "./node_modules/.bin/truffle develop"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "truffle": "^4.0.5"
+  },
+  "dependencies": {
+  }
+}

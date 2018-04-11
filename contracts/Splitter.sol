@@ -6,7 +6,7 @@ import "./Pausable.sol";
 
 /**
  * @title Splitter
- * @dev Contract for funds splitting btw 2 address
+ * @dev Contract for funds splitting btw 2 address and withdraw requests
 */
 
 contract Splitter is Ownable, Pausable{
@@ -16,31 +16,6 @@ contract Splitter is Ownable, Pausable{
     event Withdraw(address indexed _from, uint _amount);
 
     mapping(address => uint) public balances;
-
-    /**
-     * @dev private function to avoid self, same address, empty address splits
-    */
-    function _areAcceptableRecipients(address _first_recipient, address _second_recipient) private view returns (bool areAvoided) {
-        require(_first_recipient != _second_recipient);
-        require(_first_recipient != address(0x00) && _second_recipient != address(0x00));
-        require(_first_recipient != msg.sender && _second_recipient != msg.sender);
-        return true;
-    }
-
-    /**
-     * @dev private function to actually pay the recipients
-    */
-    function _isDivisible(uint _amount) private pure returns (bool isDivisible) {
-        if(_amount > 0 && _amount % 2 == 0) return true;
-        else return false;
-    }
-
-    /**
-     * @dev private function to actually perform the transfer after a withdrawal request
-    */
-    function _performWithdraw(address _recipient, uint _amount) private {
-        _recipient.transfer(_amount);
-    }
 
     /**
      * @dev public function for splitting
@@ -72,5 +47,30 @@ contract Splitter is Ownable, Pausable{
         emit Withdraw(msg.sender, balances[msg.sender]);
         _performWithdraw(msg.sender, deposit[msg.sender]);
         return true;
+    }
+
+    /**
+     * @dev private function to avoid self, same address, empty address splits
+    */
+    function _areAcceptableRecipients(address _first_recipient, address _second_recipient) private view returns (bool areAvoided) {
+        require(_first_recipient != _second_recipient);
+        require(_first_recipient != address(0x00) && _second_recipient != address(0x00));
+        require(_first_recipient != msg.sender && _second_recipient != msg.sender);
+        return true;
+    }
+
+    /**
+     * @dev private function to actually pay the recipients
+    */
+    function _isDivisible(uint _amount) private pure returns (bool isDivisible) {
+        if(_amount > 0 && _amount % 2 == 0) return true;
+        else return false;
+    }
+
+    /**
+     * @dev private function to actually perform the transfer after a withdrawal request
+    */
+    function _performWithdraw(address _recipient, uint _amount) private {
+        _recipient.transfer(_amount);
     }
 }
