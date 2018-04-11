@@ -173,4 +173,38 @@ contract('Splitter', function(accounts) {
 
         //ToDo check on inherited contracts functionalities
     })
+    describe("Testing withdrawal public function:", function() {
+        describe("Failing cases:", function(){
+            it("should not increment the recipient balance", function(){
+                //
+            })
+        })
+        describe("Successful cases:", function(){
+            it("should set recipient withdraw = 0", function(){
+                var first_recipient_initial_balance = web3.eth.getBalance(first_recipient)
+                return contract.split(first_recipient, second_recipient, {from: owner_or_sender, value: 2})
+                    .then(_res => {
+                        return contract.withdraw({from: first_recipient})
+                            .then(_res => {
+                                return  contract.balances(first_recipient, {from: owner_or_sender})
+                                    .then(_balance => {
+                                        assert.strictEqual(_balance.toString(10), "0", "first_recipient pending withdraw is not 0")
+                                    })
+                            })
+                    })
+            })
+            it("should increment the recipients balance", function(){
+                var first_recipient_initial_balance = web3.eth.getBalance(first_recipient)
+                return contract.split(first_recipient, second_recipient, {from: owner_or_sender, value: 2})
+                    .then(_res => {
+                        return contract.withdraw({from: first_recipient})
+                            .then(_res => {
+                                console.log(_res.receipt.logs[0].args)
+                                var first_recipient_final_balance = web3.eth.getBalance(first_recipient)
+                                expect(first_recipient_final_balance.toNumber()).to.be.gt(first_recipient_initial_balance)
+                            })
+                    })
+            })
+        })
+    })
 })
