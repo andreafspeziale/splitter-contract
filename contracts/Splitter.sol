@@ -43,10 +43,10 @@ contract Splitter is Ownable, Pausable{
     */
     function withdraw() public payable returns(bool withdrawSuccess) {
         if(!(balances[msg.sender] > 0)) return false;
-        // emit the Split event
-        emit Withdraw(msg.sender, balances[msg.sender]);
+        uint memory amount = balances[msg.sender];
         balances[msg.sender] = 0;
-        _performWithdraw(msg.sender, balances[msg.sender]);
+        emit Withdraw(msg.sender, amount);
+        _performWithdraw(msg.sender, amount);
         return true;
     }
 
