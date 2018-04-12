@@ -29,8 +29,8 @@ contract Splitter is Ownable, Pausable{
         uint amountSplitted = msg.value / 2;
 
         // each time the amount will be overwritten in this way
-        balances[_first_recipient] = amountSplitted;
-        balances[_second_recipient] = amountSplitted;
+        balances[_first_recipient] += amountSplitted;
+        balances[_second_recipient] += amountSplitted;
 
         // emit the Split event
         emit Split(msg.sender, _first_recipient, _second_recipient, amountSplitted);
