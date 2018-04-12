@@ -13,7 +13,7 @@
 - `$ npm install`
 
 ## Launch Truffle private network
-> and build the MetaCoin contract
+> and build and deploy the Splitter contract
 - `$ npm run develop`
 - `truffle(develop)> migrate`
 
