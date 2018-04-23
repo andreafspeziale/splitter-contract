@@ -12,8 +12,8 @@ import "./Pausable.sol";
 contract Splitter is Ownable, Pausable{
 
     // Event
-    event Split(address indexed _from, address indexed _first_recipient, address indexed _second_recipient, uint _amount);
-    event Withdraw(address indexed _from, uint _amount);
+    event Split(address indexed from, address indexed firstRecipient, address indexed secondRecipient, uint amount);
+    event Withdraw(address indexed from, uint amount);
 
     mapping(address => uint) public balances;
 
@@ -22,20 +22,20 @@ contract Splitter is Ownable, Pausable{
     /**
      * @dev public function for splitting
     */
-    function split(address _first_recipient, address _second_recipient) public payable returns (bool splitSuccess) {
+    function split(address firstRecipient, address secondRecipient) public payable returns (bool splitSuccess) {
         // checks
-        if(!_areAcceptableRecipients(_first_recipient, _second_recipient)) revert();
+        if(!_areAcceptableRecipients(firstRecipient, secondRecipient)) revert();
         if(!_isDivisible(msg.value)) revert();
 
         // split the amount
         uint amountSplitted = msg.value / 2;
 
         // each time the amount will be overwritten in this way
-        balances[_first_recipient] += amountSplitted;
-        balances[_second_recipient] += amountSplitted;
+        balances[firstRecipient] += amountSplitted;
+        balances[secondRecipient] += amountSplitted;
 
         // emit the Split event
-        emit Split(msg.sender, _first_recipient, _second_recipient, amountSplitted);
+        Split(msg.sender, firstRecipient, secondRecipient, amountSplitted);
 
         return true;
     }
@@ -47,7 +47,7 @@ contract Splitter is Ownable, Pausable{
         if(!(balances[msg.sender] > 0)) revert();
         uint amount = balances[msg.sender];
         balances[msg.sender] = 0;
-        emit Withdraw(msg.sender, amount);
+        Withdraw(msg.sender, amount);
         msg.sender.transfer(amount);
         return true;
     }
@@ -55,10 +55,10 @@ contract Splitter is Ownable, Pausable{
     /**
      * @dev private function to avoid self, same address, empty address splits
     */
-    function _areAcceptableRecipients(address _first_recipient, address _second_recipient) private view returns (bool areAvoided) {
-        require(_first_recipient != _second_recipient);
-        require(_first_recipient != address(0x00) && _second_recipient != address(0x00));
-        require(_first_recipient != msg.sender && _second_recipient != msg.sender);
+    function _areAcceptableRecipients(address firstRecipient, address secondRecipient) private view returns (bool areAvoided) {
+        require(firstRecipient != secondRecipient);
+        require(firstRecipient != address(0x00) && secondRecipient != address(0x00));
+        require(firstRecipient != msg.sender && secondRecipient != msg.sender);
         return true;
     }
 
