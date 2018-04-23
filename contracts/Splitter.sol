@@ -42,11 +42,11 @@ contract Splitter is Ownable, Pausable{
      * @dev public function for withdraw funds only if sender is in the balances
     */
     function withdraw() public payable returns(bool withdrawSuccess) {
-        if(!(balances[msg.sender] > 0)) return false;
+        if(!(balances[msg.sender] > 0)) revert();
         uint amount = balances[msg.sender];
         balances[msg.sender] = 0;
         emit Withdraw(msg.sender, amount);
-        _performWithdraw(msg.sender, amount);
+        msg.sender.transfer(amount);
         return true;
     }
 
@@ -64,14 +64,6 @@ contract Splitter is Ownable, Pausable{
      * @dev private function to actually pay the recipients
     */
     function _isDivisible(uint _amount) private pure returns (bool isDivisible) {
-        if(_amount > 0 && _amount % 2 == 0) return true;
-        else return false;
-    }
-
-    /**
-     * @dev private function to actually perform the transfer after a withdrawal request
-    */
-    function _performWithdraw(address _recipient, uint _amount) private {
-        _recipient.transfer(_amount);
+        return _amount > 0 && _amount % 2 == 0;
     }
 }
