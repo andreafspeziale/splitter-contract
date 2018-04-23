@@ -17,6 +17,8 @@ contract Splitter is Ownable, Pausable{
 
     mapping(address => uint) public balances;
 
+    function Splitter(bool _status) Pausable(_status) public {}
+
     /**
      * @dev public function for splitting
     */
