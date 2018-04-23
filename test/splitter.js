@@ -57,6 +57,33 @@ contract('Splitter', function(accounts) {
         assert.strictEqual(status, false, "Contract owner is not the same")
     })
 
+    it("should not be able to set pause", async () => {
+        try {
+            const status = await contract.pause({from: firsRecipient})
+            assert.isUndefined(status, 'Anyone can pause my contract')
+        } catch(err) {
+            assert.include(err.message, 'revert', 'No revert if anyone kill my contract');
+        }
+    })
+
+    it("should be able to set pause", async () => {
+            const pause = await contract.pause()
+            const status = await contract.paused()
+            assert.strictEqual(status, true, 'Owner is not able to pause the contract')
+    })
+
+    it("should LogPause event", async () => {
+        const pause = await contract.pause()
+        const ev = expectEvent(pause, 'LogPause')
+        expect(ev.args.whodunnit).to.equal(ownerOrSender)
+    })
+
+    it("should LogUnpause event", async () => {
+        const pause = await contract.pause()
+        const ev = expectEvent(pause, 'LogPause')
+        expect(ev.args.whodunnit).to.equal(ownerOrSender)
+    })
+
     // describe("Testing split public function:", function() {
 
     //     describe("Failing cases:", function(){
