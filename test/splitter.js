@@ -33,55 +33,79 @@ contract('Splitter', function(accounts) {
     //     }
     // })
 
-    it("should be own by owner", async () => {
-        const owner = await contract.owner({from: ownerOrSender})
-        assert.strictEqual(owner, ownerOrSender, "Contract owner is not the same")
+    describe("Ownership stuff:", async () => {
+        it("should be own by owner", async () => {
+            const owner = await contract.owner({from: ownerOrSender})
+            assert.strictEqual(owner, ownerOrSender, "Contract owner is not the same")
+        })
+
+        it("should set a new owner", async () => {
+            const transferOwnership = await contract.transferOwnership(firsRecipient)
+            const newOwner = await contract.owner()
+            assert.strictEqual(newOwner, firsRecipient, "Contract owner has not been updated")
+        })
+
+        it("should log an OwnershipTransferred event", async () => {
+            const transferOwnership = await contract.transferOwnership(secondRecipient)
+            const newOwner = await contract.owner()
+            const ev = expectEvent(transferOwnership, 'OwnershipTransferred')
+            expect(ev.args.previousOwner).to.equal(ownerOrSender)
+            expect(ev.args.newOwner).to.equal(secondRecipient)
+        })
     })
 
-    it("should set a new owner", async () => {
-        const transferOwnership = await contract.transferOwnership(firsRecipient)
-        const newOwner = await contract.owner()
-        assert.strictEqual(newOwner, firsRecipient, "Contract owner has not been updated")
-    })
-
-    it("should log an OwnershipTransferred event", async () => {
-        const transferOwnership = await contract.transferOwnership(secondRecipient)
-        const newOwner = await contract.owner()
-        const ev = expectEvent(transferOwnership, 'OwnershipTransferred')
-        expect(ev.args.previousOwner).to.equal(ownerOrSender)
-        expect(ev.args.newOwner).to.equal(secondRecipient)
-    })
-
-    it("should set pause property to false", async () => {
-        const status = await contract.paused()
-        assert.strictEqual(status, false, "Contract owner is not the same")
-    })
-
-    it("should not be able to set pause", async () => {
-        try {
-            const status = await contract.pause({from: firsRecipient})
-            assert.isUndefined(status, 'Anyone can pause my contract')
-        } catch(err) {
-            assert.include(err.message, 'revert', 'No revert if anyone kill my contract');
-        }
-    })
-
-    it("should be able to set pause", async () => {
-            const pause = await contract.pause()
+    describe("Pause stuff:", async () => {
+        it("should set pause property to false", async () => {
             const status = await contract.paused()
-            assert.strictEqual(status, true, 'Owner is not able to pause the contract')
+            assert.strictEqual(status, false, "Contract owner is not the same")
+        })
+
+        it("should not be able to set pause", async () => {
+            try {
+                const status = await contract.pause({from: firsRecipient})
+                assert.isUndefined(status, 'Anyone can pause my contract')
+            } catch(err) {
+                assert.include(err.message, 'revert', 'No revert if anyone kill my contract');
+            }
+        })
+
+        it("should be able to set pause", async () => {
+                const pause = await contract.pause()
+                const status = await contract.paused()
+                assert.strictEqual(status, true, 'Owner is not able to pause the contract')
+        })
+
+        it("should LogPause event", async () => {
+            const pause = await contract.pause()
+            const ev = expectEvent(pause, 'LogPause')
+            expect(ev.args.whodunnit).to.equal(ownerOrSender)
+        })
+
+        it("should LogUnpause event", async () => {
+            const pause = await contract.pause()
+            const ev = expectEvent(pause, 'LogPause')
+            expect(ev.args.whodunnit).to.equal(ownerOrSender)
+        })
     })
 
-    it("should LogPause event", async () => {
-        const pause = await contract.pause()
-        const ev = expectEvent(pause, 'LogPause')
-        expect(ev.args.whodunnit).to.equal(ownerOrSender)
-    })
-
-    it("should LogUnpause event", async () => {
-        const pause = await contract.pause()
-        const ev = expectEvent(pause, 'LogPause')
-        expect(ev.args.whodunnit).to.equal(ownerOrSender)
+    describe("Split public function:", async () => {
+        it("should fail if the owner/sender is the part of the split process", async () => {
+            try {
+                const split = await contract.split(firsRecipient, ownerOrSender, {from: ownerOrSender, value: 1})
+                assert.isUndefined(split, 'The owner can take part in the split proccess')
+            } catch(e) {
+                assert.include(e.message, 'revert', 'The owner cannot take part in the split proccess');
+            }
+        })
+        it("should fail if the recipients are the same", async () => {
+            try {
+                const split = await contract.split(firsRecipient, firsRecipient, {from: ownerOrSender, value: 1})
+                assert.isUndefined(split, 'The split process can accept same recipients')
+            } catch(e) {
+                console.log(e)
+                assert.include(e.message, 'revert', 'The split process cannot accept same recipients');
+            }
+        })
     })
 
     // describe("Testing split public function:", function() {
