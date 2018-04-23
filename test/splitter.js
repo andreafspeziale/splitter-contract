@@ -1,16 +1,18 @@
-var Splitter = artifacts.require("./Splitter.sol")
+// ToDo move to const
+
+const Splitter = artifacts.require("./Splitter.sol")
 
 contract('Splitter', function(accounts) {
 
-    var contract
-    var owner_or_sender = accounts[0]
-    var first_recipient = accounts[1]
-    var second_recipient = accounts[2]
-    var third_party = accounts[3]
+    let contract
+    const owner_or_sender = accounts[0]
+    const first_recipient = accounts[1]
+    const second_recipient = accounts[2]
+    const third_party = accounts[3]
 
     // deploy
     beforeEach(function() {
-        return Splitter.new({from: owner_or_sender}).then(function(_instance){
+        return Splitter.new().then(function(_instance){
              contract = _instance
         })
     })
@@ -22,9 +24,11 @@ contract('Splitter', function(accounts) {
     })
 
     it("should not be created passing a value", function(){
-        return Splitter.new({from: owner_or_sender, value: 10}).then(function(_instance){
-            //
-        }).catch(err => assert.include(err.message, 'non-payable constructor'))
+        return Splitter.new({from: owner_or_sender, value: 10})
+            .then(
+                instance => assert.fail('should not be created passing a value'),
+                err => assert.include(err.message, 'non-payable constructor')
+            );
     })
 
     describe("Testing split public function:", function() {
@@ -80,13 +84,16 @@ contract('Splitter', function(accounts) {
                     }).catch(err => assert.include(err.message, 'revert'))
             })
 
-            it("should fail because of amount % 2 != 0", function(){
-                return contract.split(first_recipient, second_recipient, {from: owner_or_sender, value: 1})
-                    .then(function(_txn){
-                        //
-                    }).catch(err => assert.include(err.message, 'revert'))
+            it("should fail because of amount % 2 != 0", async () => {
+                try {
+                    const split = contract.split(first_recipient, second_recipient, {from: owner_or_sender, value: 1})
+                    console.log(split)
+                } catch(e) {console.error(e)}
             })
         })
+
+        // ToDo async and flat by chaining
+
         describe("Successful cases:", function(){
             it("should not change recipients balances", function(){
                             var first_recipient_initial_balance = web3.eth.getBalance(first_recipient)
