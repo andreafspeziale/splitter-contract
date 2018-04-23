@@ -12,5 +12,6 @@
     "truffle": "^4.0.5"
   },
   "dependencies": {
+    "lodash": "^4.17.5"
   }
 }
