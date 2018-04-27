@@ -12,8 +12,8 @@ import "./Pausable.sol";
 contract Splitter is Ownable, Pausable{
 
     // Event
-    event Split(address indexed from, address indexed firstRecipient, address indexed secondRecipient, uint amount);
-    event Withdraw(address indexed from, uint amount);
+    event LogSplit(address indexed from, address indexed firstRecipient, address indexed secondRecipient, uint amount);
+    event LogWithdraw(address indexed from, uint amount);
 
     mapping(address => uint) public balances;
 
@@ -35,7 +35,7 @@ contract Splitter is Ownable, Pausable{
         balances[secondRecipient] += amountSplitted;
 
         // emit the Split event
-        Split(msg.sender, firstRecipient, secondRecipient, amountSplitted);
+        LogSplit(msg.sender, firstRecipient, secondRecipient, amountSplitted);
 
         return true;
     }
@@ -47,7 +47,7 @@ contract Splitter is Ownable, Pausable{
         if(!(balances[msg.sender] > 0)) revert();
         uint amount = balances[msg.sender];
         balances[msg.sender] = 0;
-        Withdraw(msg.sender, amount);
+        LogWithdraw(msg.sender, amount);
         msg.sender.transfer(amount);
         return true;
     }
