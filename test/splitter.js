@@ -43,10 +43,10 @@ contract('Splitter', function(accounts) {
             assert.strictEqual(newOwner, firsRecipient, "Contract owner has not been updated")
         })
 
-        it("should log an OwnershipTransferred event", async () => {
+        it("should log an LogOwnershipTransferred event", async () => {
             const transferOwnership = await contract.transferOwnership(secondRecipient)
             const newOwner = await contract.owner()
-            const ev = expectEvent(transferOwnership, 'OwnershipTransferred')
+            const ev = expectEvent(transferOwnership, 'LogOwnershipTransferred')
             expect(ev.args.previousOwner).to.equal(ownerOrSender)
             expect(ev.args.newOwner).to.equal(secondRecipient)
         })
@@ -143,9 +143,9 @@ contract('Splitter', function(accounts) {
             assert.strictEqual(balances.toString(10), web3.toWei('2', 'ether').toString(10), "firsRecipient has not 2 ether ready for withdraw")
             assert.strictEqual(balances2.toString(10), web3.toWei('2', 'ether').toString(10), "firsRecipient has not 2 ether ready for withdraw")
         })
-        it("should fire Split event", async () => {
+        it("should fire LogSplit event", async () => {
             const split = await contract.split(firsRecipient, secondRecipient, {from: ownerOrSender, value: web3.toWei('4', 'ether')})
-            const ev = expectEvent(split, 'Split')
+            const ev = expectEvent(split, 'LogSplit')
             expect(ev.args.from).to.equal(ownerOrSender)
             expect(ev.args.firstRecipient).to.equal(firsRecipient)
             expect(ev.args.secondRecipient).to.equal(secondRecipient)
@@ -159,10 +159,10 @@ contract('Splitter', function(accounts) {
         })
     })
     describe("Withdraw public function:", async () => {
-        it("should fire Withdraw event", async () => {
+        it("should fire LogWithdraw event", async () => {
             const split = await contract.split(firsRecipient, secondRecipient, {from: ownerOrSender, value: web3.toWei('4', 'ether')})
             const withdraw = await contract.withdraw({from: firsRecipient})
-            const ev = expectEvent(withdraw, 'Withdraw')
+            const ev = expectEvent(withdraw, 'LogWithdraw')
             expect(ev.args.from).to.equal(firsRecipient)
             expect(ev.args.amount.toString(10)).to.equal(web3.toWei('2', 'ether'))
         })
