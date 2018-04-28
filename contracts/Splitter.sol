@@ -44,11 +44,11 @@ contract Splitter is Ownable, Pausable{
      * @dev public function for withdraw funds only if sender is in the balances
     */
     function withdraw() public payable returns(bool withdrawSuccess) {
-        if(!(balances[msg.sender] > 0)) revert();
         uint amount = balances[msg.sender];
+        if(!(amount > 0)) revert();
         balances[msg.sender] = 0;
-        LogWithdraw(msg.sender, amount);
         msg.sender.transfer(amount);
+        LogWithdraw(msg.sender, amount);
         return true;
     }
 
