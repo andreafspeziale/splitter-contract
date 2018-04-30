@@ -173,30 +173,19 @@ contract('Splitter', function(accounts) {
             const final = await web3.eth.getBalance(firsRecipient)
             assert.isAbove(final, initial, "firsRecipient balance is not greater than before the withdraw request")
         })
-        it("should increase recipient balance", async () => {
-            const initial = await web3.eth.getBalance(firsRecipient)
-            
+        it("should have final balance equal to the diff btw initial balance - sent - tx cost", async () => {
+            const senderInitial = await web3.eth.getBalance(ownerOrSender)
+
             const split = await contract.split(firsRecipient, secondRecipient, {from: ownerOrSender, value: web3.toWei('4', 'ether')})
 
             const splitGasUsed = split.receipt.gasUsed
-            console.log(`split transaction gas used: ${splitGasUsed}`)
             const splitGasPrice = await web3.eth.getTransaction(split.tx).gasPrice
-            console.log(`split transaction gas price: ${web3.toWei(splitGasPrice, 'wei')}`)
             const splitTransactionCost = splitGasUsed * (web3.toWei(splitGasPrice, 'wei'))
-            console.log(`split transaction cost in wei, gasUsed * gasPrice: ${splitTransactionCost}`)
 
-            const withdraw = await contract.withdraw({from: firsRecipient})
+            const diff = senderInitial - web3.toWei('4', 'ether') - splitTransactionCost
+            const senderFinal = await web3.eth.getBalance(ownerOrSender)
 
-            const gasUsed = withdraw.receipt.gasUsed
-            console.log(`withdraw transaction gas used: ${gasUsed}`)
-            const gasPrice = await web3.eth.getTransaction(withdraw.tx).gasPrice
-            console.log(`withdraw transaction gas price: ${web3.toWei(gasPrice, 'wei')}`)
-            const withdrawTransactionCost = gasUsed * (web3.toWei(gasPrice, 'wei'))
-            console.log(`withdraw transaction cost in wei, gasUsed * gasPrice: ${withdrawTransactionCost}`)
-
-
-            const final = await web3.eth.getBalance(firsRecipient)
-            assert.isAbove(final, initial, "firsRecipient balance is not greater than before the withdraw request")
+            assert.equal(senderFinal, diff, "sender (initial balance - sent - transaction cost) is not equal to the final balance")
         })
     })
 })
