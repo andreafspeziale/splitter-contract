@@ -45,7 +45,7 @@ contract Splitter is Ownable, Pausable{
     */
     function withdraw() public payable returns(bool withdrawSuccess) {
         uint amount = balances[msg.sender];
-        if(!(amount > 0)) revert();
+        require(amount>0);
         balances[msg.sender] = 0;
         msg.sender.transfer(amount);
         LogWithdraw(msg.sender, amount);
