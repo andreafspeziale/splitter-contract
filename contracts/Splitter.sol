@@ -24,8 +24,8 @@ contract Splitter is Ownable, Pausable{
     */
     function split(address firstRecipient, address secondRecipient) public payable returns (bool splitSuccess) {
         // checks
-        if(!_areAcceptableRecipients(firstRecipient, secondRecipient)) revert();
-        if(!_isDivisible(msg.value)) revert();
+        require(_areAcceptableRecipients(firstRecipient, secondRecipient));
+        require(_isDivisible(msg.value));
 
         // split the amount
         uint amountSplitted = msg.value / 2;
