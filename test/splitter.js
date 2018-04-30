@@ -128,11 +128,11 @@ contract('Splitter', function(accounts) {
             }
         })
         it("should not change recipients balances", async () => {
-            const firstInitial = web3.eth.getBalance(firsRecipient)
-            const secondInitial = web3.eth.getBalance(secondRecipient)
+            const firstInitial = await web3.eth.getBalance(firsRecipient)
+            const secondInitial = await web3.eth.getBalance(secondRecipient)
             const split = await contract.split(firsRecipient, secondRecipient, {from: ownerOrSender, value: web3.toWei('4', 'ether')})
-            const firstFinal = web3.eth.getBalance(firsRecipient)
-            const secondFinal = web3.eth.getBalance(secondRecipient)
+            const firstFinal = await web3.eth.getBalance(firsRecipient)
+            const secondFinal = await web3.eth.getBalance(secondRecipient)
             assert.strictEqual(firstInitial.toString(10), firstFinal.toString(10), "firsRecipient has a changed balance")
             assert.strictEqual(secondInitial.toString(10), secondFinal.toString(10), "secondRecipient has a changed balance")
         })
@@ -167,10 +167,10 @@ contract('Splitter', function(accounts) {
             expect(ev.args.amount.toString(10)).to.equal(web3.toWei('2', 'ether'))
         })
         it("should increase recipient balance", async () => {
-            const initial = web3.eth.getBalance(firsRecipient)
+            const initial = await web3.eth.getBalance(firsRecipient)
             const split = await contract.split(firsRecipient, secondRecipient, {from: ownerOrSender, value: web3.toWei('4', 'ether')})
             const withdraw = await contract.withdraw({from: firsRecipient})
-            const final = web3.eth.getBalance(firsRecipient)
+            const final = await web3.eth.getBalance(firsRecipient)
             assert.isAbove(final, initial, "firsRecipient balance is not greater than before the withdraw request")
         })
     })
